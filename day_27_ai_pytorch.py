@@ -246,3 +246,40 @@ class FlamingoLayer(nn.Module):
     Flamingo от DeepMind
     Сочетает vision encoder, text LLM и cross-attention между ними
     """
+    def __init__(self, d_model: int = 512, num_heads: int = 8):
+        super().__init__()
+
+        # Cross-attention между текстом и изображениями
+        self.cross_attention = nn.MultiheadAttention(d_model, num_heads, batch_first=True)
+        self.cross_norm = nn.LayerNorm(d_model)
+
+        # Self-attention для текста
+        self.self_attention = nn.MultiheadAttention(d_model, num_heads, batch_first=True)
+        self.self_norm = nn.LayerNorm(d_model)
+
+        #FFN
+        self.ffn = nn.Sequential(
+            nn.Linear(d_model, 4 * d_model),
+            nn.ReLU(),
+            nn.Linear(4 * d_model, d_model),
+        )
+        self.ffn_norm = nn.LayerNorm(d_model)
+
+    def forward(self, text: torch.Tensor, visual: torch.Tensor, visual_mask: torch.Tensor = None) -> torch.Tensor:
+        """
+        text: [batch, text_len, d_model]
+        visual: [batch, num_images, d_model]
+        """
+        # Cross-attention: текст внимает к изображениям
+        cross_out, _ = self.cross_attention(text, visual, visual, key_padding_mask=visual_mask)
+        text = self.cross_norm(text + cross_out)
+
+        # Self-attention внутри текста
+        self_out, _ = self.self_attention(text, text, text)
+        text = self.self_norm(text + self_out)
+
+        #FFN
+        ffn_out = self.ffn(text)
+        text = self.ffn_norm(text + ffn_out)
+
+        return text
