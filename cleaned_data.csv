@@ -1,0 +1,11 @@
+name,age,income,city,gender,score
+Alice,25.0,50000.0,NYC,F,85
+Bob,30.0,60000.0,LA,M,92
+Alice,25.0,50000.0,NYC,F,85
+Charlie,35.0,80000.0,Chicago,M,78
+Bob,30.0,60000.0,LA,M,92
+David,40.0,95000.0, NYC ,M,88
+Eve,28.0,45000.0,Houston,F,95
+Frank,33.0,70000.0,Chicago,M,80
+Grace,30.0,55000.0,LA,F,90
+Heidi,29.0,62777.77777777778,Miami,F,87
